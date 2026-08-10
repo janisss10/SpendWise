@@ -1,12 +1,14 @@
-import './App.css'
+import { useAuth } from "./context/AuthContext";
+import AppRoutes from "./routes/AppRoutes";
 
 function App() {
-  return (
-    <div>
-      <h1>SpendWise</h1>
-      <p>Your personal finance dashboard.</p>
-    </div>
-  );
+  const { loading } = useAuth();
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  return <AppRoutes />;
 }
 
 export default App;

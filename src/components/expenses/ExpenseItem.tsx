@@ -7,9 +7,10 @@ import type { Expense } from "../../types/expense";
 interface ExpenseItemProps {
   expense: Expense;
   onEdit: (expense: Expense) => void;
+  onDelete: (expense: Expense) => void;
 }
 
-function ExpenseItem({ expense, onEdit }: ExpenseItemProps) {
+function ExpenseItem({ expense, onEdit, onDelete }: ExpenseItemProps) {
   return (
     <Box
       sx={{
@@ -48,7 +49,11 @@ function ExpenseItem({ expense, onEdit }: ExpenseItemProps) {
           <EditOutlined fontSize="small" />
         </IconButton>
 
-        <IconButton size="small">
+        <IconButton
+          size="small"
+          color="error"
+          onClick={() => onDelete(expense)}
+        >
           <DeleteOutlined fontSize="small" />
         </IconButton>
       </Stack>

@@ -23,6 +23,7 @@ function Expenses() {
   const [expenses, setExpenses] = useState(mockExpenses);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
+  const [deletingExpense, setDeletingExpense] = useState<Expense | null>(null);
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
@@ -102,6 +103,9 @@ function Expenses() {
         onEdit={(expense) => {
           setEditingExpense(expense);
         }}
+        onDelete={(expense) => {
+          setDeletingExpense(expense);
+        }}
       />
 
       <Dialog
@@ -153,6 +157,65 @@ function Expenses() {
               setEditingExpense(null);
             }}
           />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={deletingExpense !== null}
+        onClose={() => setDeletingExpense(null)}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle>Delete expense?</DialogTitle>
+
+        <DialogContent>
+          <Stack spacing={2}>
+            <Typography color="text.secondary">
+              Are you sure you want to delete{" "}
+              <strong>{deletingExpense?.title}</strong>? This action cannot be
+              undone.
+            </Typography>
+
+            <Stack
+              direction="row"
+              spacing={2}
+              sx={{
+                justifyContent: "flex-end",
+              }}
+            >
+              <Button
+                variant="outlined"
+                onClick={() => setDeletingExpense(null)}
+              >
+                Cancel
+              </Button>
+
+              <Button
+                variant="contained"
+                color="error"
+                onClick={() => {
+                  if (!deletingExpense) {
+                    return;
+                  }
+
+                  setExpenses((currentExpenses) =>
+                    currentExpenses.filter(
+                      (expense) => expense.id !== deletingExpense.id,
+                    ),
+                  );
+
+                  setDeletingExpense(null);
+
+                  setSnackbar({
+                    open: true,
+                    message: "Expense deleted successfully",
+                  });
+                }}
+              >
+                Delete
+              </Button>
+            </Stack>
+          </Stack>
         </DialogContent>
       </Dialog>
 

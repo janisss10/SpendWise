@@ -6,9 +6,10 @@ import ExpenseItem from "./ExpenseItem";
 interface ExpenseListProps {
   expenses: Expense[];
   onEdit: (expense: Expense) => void;
+  onDelete: (expense: Expense) => void;
 }
 
-function ExpenseList({ expenses, onEdit }: ExpenseListProps) {
+function ExpenseList({ expenses, onEdit, onDelete }: ExpenseListProps) {
   return (
     <Card
       elevation={0}
@@ -23,7 +24,12 @@ function ExpenseList({ expenses, onEdit }: ExpenseListProps) {
           <Typography variant="h6">All Expenses</Typography>
 
           {expenses.map((expense) => (
-            <ExpenseItem key={expense.id} expense={expense} onEdit={onEdit} />
+            <ExpenseItem
+              key={expense.id}
+              expense={expense}
+              onEdit={onEdit}
+              onDelete={onDelete}
+            />
           ))}
         </Stack>
       </CardContent>

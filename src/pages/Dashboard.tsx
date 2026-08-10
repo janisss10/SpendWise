@@ -16,11 +16,10 @@ import {
   TrendingDown,
   TrendingUp,
 } from "@mui/icons-material";
-
 import SummaryCard from "../components/dashboard/SummaryCard";
 import RecentExpenses from "../components/dashboard/RecentExpenses";
-
 import { mockExpenses } from "../data/mockExpenses";
+import SpendingTrendChart from "../components/dashboard/SpendingTrendChart";
 
 function Dashboard() {
   const totalSpent = mockExpenses.reduce(
@@ -201,6 +200,8 @@ function Dashboard() {
           </SummaryCard>
         </Grid>
       </Grid>
+
+      <SpendingTrendChart expenses={mockExpenses} />
 
       <RecentExpenses expenses={mockExpenses} />
     </Stack>

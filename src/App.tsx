@@ -1,7 +1,16 @@
-import Login from './pages/Login';
+import Login from "./pages/Login";
+import Dashboard from "./pages/Dashboard";
+
+import { useAuth } from "./context/AuthContext";
 
 function App() {
-  return <Login />;
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  return user ? <Dashboard /> : <Login />;
 }
 
 export default App;

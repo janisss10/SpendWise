@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState } from "react";
 import {
   Alert,
   Box,
@@ -6,25 +6,23 @@ import {
   Container,
   TextField,
   Typography,
-} from '@mui/material';
+} from "@mui/material";
 
-import { loginUser } from '../services/authService';
+import { loginUser } from "../services/authService";
 
 function Login() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
-  const handleSubmit = async (
-    event: React.FormEvent<HTMLFormElement>,
-  ) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setError('');
+    setError("");
 
     try {
       await loginUser(email, password);
     } catch {
-      setError('Invalid email or password.');
+      setError("Invalid email or password.");
     }
   };
 
@@ -35,14 +33,12 @@ function Login() {
         onSubmit={handleSubmit}
         sx={{
           mt: 8,
-          display: 'flex',
-          flexDirection: 'column',
+          display: "flex",
+          flexDirection: "column",
           gap: 2,
         }}
       >
-        <Typography variant="h4">
-          Welcome back
-        </Typography>
+        <Typography variant="h4">Welcome back</Typography>
 
         <Typography color="text.secondary">
           Sign in to your SpendWise account.
@@ -66,11 +62,7 @@ function Login() {
           required
         />
 
-        <Button
-          type="submit"
-          variant="contained"
-          size="large"
-        >
+        <Button type="submit" variant="contained" size="large">
           Sign In
         </Button>
       </Box>

@@ -8,10 +8,10 @@ import {
   Typography,
 } from "@mui/material";
 
-import { loginUser } from "../services/authService";
+import { registerUser } from "../services/authService";
 import { useNavigate, Link } from "react-router-dom";
 
-function Login() {
+function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -22,10 +22,10 @@ function Login() {
     setError("");
 
     try {
-      await loginUser(email, password);
+      await registerUser(email, password);
       navigate("/dashboard");
     } catch {
-      setError("Invalid email or password.");
+      setError("Unable to create account.");
     }
   };
 
@@ -41,10 +41,10 @@ function Login() {
           gap: 2,
         }}
       >
-        <Typography variant="h4">Welcome back</Typography>
+        <Typography variant="h4">Create your account</Typography>
 
         <Typography color="text.secondary">
-          Sign in to your SpendWise account.
+          Start tracking your spending with SpendWise.
         </Typography>
 
         {error && <Alert severity="error">{error}</Alert>}
@@ -66,15 +66,15 @@ function Login() {
         />
 
         <Button type="submit" variant="contained" size="large">
-          Sign In
+          Create Account
         </Button>
 
         <Typography>
-          Don't have an account? <Link to="/register">Create one</Link>
+          Already have an account? <Link to="/login">Sign in</Link>
         </Typography>
       </Box>
     </Container>
   );
 }
 
-export default Login;
+export default Register;

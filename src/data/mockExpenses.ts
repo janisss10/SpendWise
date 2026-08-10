@@ -7,6 +7,7 @@ export const mockExpenses: Expense[] = [
     amount: 24.5,
     category: "Food",
     date: "2026-08-09",
+    description: "Dinner with friends",
   },
   {
     id: "2",
@@ -14,6 +15,7 @@ export const mockExpenses: Expense[] = [
     amount: 12,
     category: "Transport",
     date: "2026-08-08",
+    description: "Grab ride home",
   },
   {
     id: "3",
@@ -21,6 +23,7 @@ export const mockExpenses: Expense[] = [
     amount: 89.9,
     category: "Shopping",
     date: "2026-08-07",
+    description: "New clothes",
   },
   {
     id: "4",
@@ -28,6 +31,7 @@ export const mockExpenses: Expense[] = [
     amount: 17.98,
     category: "Entertainment",
     date: "2026-08-05",
+    description: "Monthly subscription",
   },
   {
     id: "5",
@@ -35,5 +39,30 @@ export const mockExpenses: Expense[] = [
     amount: 75.2,
     category: "Food",
     date: "2026-08-04",
+    description: "Weekly groceries",
+  },
+  {
+    id: "6",
+    title: "Coffee",
+    amount: 6.5,
+    category: "Food",
+    date: "2026-08-03",
+    description: "Morning coffee",
+  },
+  {
+    id: "7",
+    title: "Spotify",
+    amount: 10.98,
+    category: "Entertainment",
+    date: "2026-08-02",
+    description: "Monthly subscription",
+  },
+  {
+    id: "8",
+    title: "Bus",
+    amount: 2.2,
+    category: "Transport",
+    date: "2026-08-01",
+    description: "Bus to work",
   },
 ];

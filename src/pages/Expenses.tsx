@@ -1,17 +1,28 @@
-import { Box, Button, Stack, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  Stack,
+  Typography,
+} from "@mui/material";
 import { Add } from "@mui/icons-material";
 import ExpenseList from "../components/expenses/ExpenseList";
 import { mockExpenses } from "../data/mockExpenses";
 import { useMemo, useState } from "react";
 import ExpenseToolbar from "../components/expenses/ExpenseToolbar";
+import ExpenseForm from "../components/expenses/ExpenseForm";
 
 function Expenses() {
   const [searchQuery, setSearchQuery] = useState("");
   const [category, setCategory] = useState("all");
   const [sortBy, setSortBy] = useState("date-desc");
+  const [expenses, setExpenses] = useState(mockExpenses);
+  const [isFormOpen, setIsFormOpen] = useState(false);
 
   const filteredExpenses = useMemo(() => {
-    const filtered = mockExpenses.filter((expense) => {
+    const filtered = expenses.filter((expense) => {
       const matchesSearch =
         expense.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         expense.description?.toLowerCase().includes(searchQuery.toLowerCase());
@@ -38,7 +49,7 @@ function Expenses() {
           return b.date.localeCompare(a.date);
       }
     });
-  }, [searchQuery, category, sortBy]);
+  }, [expenses, searchQuery, category, sortBy]);
 
   return (
     <Stack spacing={3}>
@@ -60,6 +71,7 @@ function Expenses() {
         <Button
           variant="contained"
           startIcon={<Add />}
+          onClick={() => setIsFormOpen(true)}
           sx={{
             borderRadius: 2,
             textTransform: "none",
@@ -79,6 +91,29 @@ function Expenses() {
       />
 
       <ExpenseList expenses={filteredExpenses} />
+
+      <Dialog
+        open={isFormOpen}
+        onClose={() => setIsFormOpen(false)}
+        fullWidth
+        maxWidth="sm"
+      >
+        <DialogTitle>Add Expense</DialogTitle>
+
+        <DialogContent>
+          <ExpenseForm
+            onSubmit={(newExpense) => {
+              setExpenses((currentExpenses) => [
+                newExpense,
+                ...currentExpenses,
+              ]);
+
+              setIsFormOpen(false);
+            }}
+            onCancel={() => setIsFormOpen(false)}
+          />
+        </DialogContent>
+      </Dialog>
     </Stack>
   );
 }

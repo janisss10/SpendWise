@@ -4,6 +4,7 @@ import {
   Dialog,
   DialogContent,
   DialogTitle,
+  Snackbar,
   Stack,
   Typography,
 } from "@mui/material";
@@ -13,6 +14,7 @@ import { mockExpenses } from "../data/mockExpenses";
 import { useMemo, useState } from "react";
 import ExpenseToolbar from "../components/expenses/ExpenseToolbar";
 import ExpenseForm from "../components/expenses/ExpenseForm";
+import type { Expense } from "../types/expense";
 
 function Expenses() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -20,6 +22,11 @@ function Expenses() {
   const [sortBy, setSortBy] = useState("date-desc");
   const [expenses, setExpenses] = useState(mockExpenses);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+  });
 
   const filteredExpenses = useMemo(() => {
     const filtered = expenses.filter((expense) => {
@@ -90,30 +97,80 @@ function Expenses() {
         onSortChange={setSortBy}
       />
 
-      <ExpenseList expenses={filteredExpenses} />
+      <ExpenseList
+        expenses={filteredExpenses}
+        onEdit={(expense) => {
+          setEditingExpense(expense);
+        }}
+      />
 
       <Dialog
-        open={isFormOpen}
-        onClose={() => setIsFormOpen(false)}
+        open={isFormOpen || editingExpense !== null}
+        onClose={() => {
+          setIsFormOpen(false);
+          setEditingExpense(null);
+        }}
         fullWidth
         maxWidth="sm"
       >
-        <DialogTitle>Add Expense</DialogTitle>
+        <DialogTitle>
+          {editingExpense ? "Edit Expense" : "Add Expense"}
+        </DialogTitle>
 
         <DialogContent>
           <ExpenseForm
-            onSubmit={(newExpense) => {
-              setExpenses((currentExpenses) => [
-                newExpense,
-                ...currentExpenses,
-              ]);
+            expense={editingExpense ?? undefined}
+            onSubmit={(updatedExpense) => {
+              if (editingExpense) {
+                setExpenses((currentExpenses) =>
+                  currentExpenses.map((expense) =>
+                    expense.id === updatedExpense.id ? updatedExpense : expense,
+                  ),
+                );
 
-              setIsFormOpen(false);
+                setEditingExpense(null);
+
+                setSnackbar({
+                  open: true,
+                  message: "Expense updated successfully",
+                });
+              } else {
+                setExpenses((currentExpenses) => [
+                  updatedExpense,
+                  ...currentExpenses,
+                ]);
+
+                setIsFormOpen(false);
+
+                setSnackbar({
+                  open: true,
+                  message: "Expense added successfully",
+                });
+              }
             }}
-            onCancel={() => setIsFormOpen(false)}
+            onCancel={() => {
+              setIsFormOpen(false);
+              setEditingExpense(null);
+            }}
           />
         </DialogContent>
       </Dialog>
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={() =>
+          setSnackbar((current) => ({
+            ...current,
+            open: false,
+          }))
+        }
+        message={snackbar.message}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "left",
+        }}
+      />
     </Stack>
   );
 }

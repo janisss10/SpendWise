@@ -5,16 +5,17 @@ import { Button, MenuItem, Stack, TextField } from "@mui/material";
 import type { Expense } from "../../types/expense";
 
 interface ExpenseFormProps {
+  expense?: Expense;
   onSubmit: (expense: Expense) => void;
   onCancel: () => void;
 }
 
-function ExpenseForm({ onSubmit, onCancel }: ExpenseFormProps) {
-  const [title, setTitle] = useState("");
-  const [amount, setAmount] = useState("");
-  const [category, setCategory] = useState("Food");
-  const [date, setDate] = useState("");
-  const [description, setDescription] = useState("");
+function ExpenseForm({ expense, onSubmit, onCancel }: ExpenseFormProps) {
+  const [title, setTitle] = useState(expense?.title ?? "");
+  const [amount, setAmount] = useState(expense?.amount.toString() ?? "");
+  const [category, setCategory] = useState(expense?.category ?? "Food");
+  const [date, setDate] = useState(expense?.date ?? "");
+  const [description, setDescription] = useState(expense?.description ?? "");
   const [errors, setErrors] = useState<{
     title?: string;
     amount?: string;
@@ -47,8 +48,8 @@ function ExpenseForm({ onSubmit, onCancel }: ExpenseFormProps) {
       return;
     }
 
-    const newExpense: Expense = {
-      id: crypto.randomUUID(),
+    const updatedExpense: Expense = {
+      id: expense?.id ?? crypto.randomUUID(),
       title: title.trim(),
       amount: Number(amount),
       category,
@@ -56,7 +57,7 @@ function ExpenseForm({ onSubmit, onCancel }: ExpenseFormProps) {
       description: description.trim(),
     };
 
-    onSubmit(newExpense);
+    onSubmit(updatedExpense);
   };
 
   return (
@@ -168,7 +169,7 @@ function ExpenseForm({ onSubmit, onCancel }: ExpenseFormProps) {
         </Button>
 
         <Button variant="contained" onClick={handleSubmit}>
-          Add expense
+          {expense ? "Save changes" : "Add expense"}
         </Button>
       </Stack>
     </Stack>

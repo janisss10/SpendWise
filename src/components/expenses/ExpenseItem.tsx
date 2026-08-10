@@ -6,9 +6,10 @@ import type { Expense } from "../../types/expense";
 
 interface ExpenseItemProps {
   expense: Expense;
+  onEdit: (expense: Expense) => void;
 }
 
-function ExpenseItem({ expense }: ExpenseItemProps) {
+function ExpenseItem({ expense, onEdit }: ExpenseItemProps) {
   return (
     <Box
       sx={{
@@ -43,7 +44,7 @@ function ExpenseItem({ expense }: ExpenseItemProps) {
           ${expense.amount.toFixed(2)}
         </Typography>
 
-        <IconButton size="small">
+        <IconButton size="small" onClick={() => onEdit(expense)}>
           <EditOutlined fontSize="small" />
         </IconButton>
 

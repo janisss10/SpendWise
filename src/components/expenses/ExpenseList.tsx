@@ -5,9 +5,10 @@ import ExpenseItem from "./ExpenseItem";
 
 interface ExpenseListProps {
   expenses: Expense[];
+  onEdit: (expense: Expense) => void;
 }
 
-function ExpenseList({ expenses }: ExpenseListProps) {
+function ExpenseList({ expenses, onEdit }: ExpenseListProps) {
   return (
     <Card
       elevation={0}
@@ -22,7 +23,7 @@ function ExpenseList({ expenses }: ExpenseListProps) {
           <Typography variant="h6">All Expenses</Typography>
 
           {expenses.map((expense) => (
-            <ExpenseItem key={expense.id} expense={expense} />
+            <ExpenseItem key={expense.id} expense={expense} onEdit={onEdit} />
           ))}
         </Stack>
       </CardContent>

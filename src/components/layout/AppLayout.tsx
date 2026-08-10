@@ -12,7 +12,10 @@ function AppLayout() {
         component="main"
         sx={{
           flexGrow: 1,
-          p: 4,
+          p: {
+            xs: 2,
+            md: 4,
+          },
         }}
       >
         <Outlet />

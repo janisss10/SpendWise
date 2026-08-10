@@ -15,6 +15,7 @@ import { useMemo, useState } from "react";
 import ExpenseToolbar from "../components/expenses/ExpenseToolbar";
 import ExpenseForm from "../components/expenses/ExpenseForm";
 import type { Expense } from "../types/expense";
+import { createExpense } from "../services/expenseService";
 
 function Expenses() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -124,7 +125,7 @@ function Expenses() {
         <DialogContent>
           <ExpenseForm
             expense={editingExpense ?? undefined}
-            onSubmit={(updatedExpense) => {
+            onSubmit={async (updatedExpense) => {
               if (editingExpense) {
                 setExpenses((currentExpenses) =>
                   currentExpenses.map((expense) =>
@@ -139,17 +140,33 @@ function Expenses() {
                   message: "Expense updated successfully",
                 });
               } else {
-                setExpenses((currentExpenses) => [
-                  updatedExpense,
-                  ...currentExpenses,
-                ]);
+                try {
+                  const firestoreId = await createExpense(updatedExpense);
 
-                setIsFormOpen(false);
+                  const expenseWithId = {
+                    ...updatedExpense,
+                    id: firestoreId,
+                  };
 
-                setSnackbar({
-                  open: true,
-                  message: "Expense added successfully",
-                });
+                  setExpenses((currentExpenses) => [
+                    expenseWithId,
+                    ...currentExpenses,
+                  ]);
+
+                  setIsFormOpen(false);
+
+                  setSnackbar({
+                    open: true,
+                    message: "Expense added successfully",
+                  });
+                } catch (error) {
+                  console.error("Failed to add expense:", error);
+
+                  setSnackbar({
+                    open: true,
+                    message: "Failed to add expense",
+                  });
+                }
               }
             }}
             onCancel={() => {

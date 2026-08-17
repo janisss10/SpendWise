@@ -4,6 +4,8 @@ import {
   Button,
   Grid,
   LinearProgress,
+  Menu,
+  MenuItem,
   Stack,
   Typography,
 } from "@mui/material";
@@ -25,42 +27,37 @@ import { getExpenses } from "../services/expenseService";
 import type { Expense } from "../types/expense";
 
 function Dashboard() {
-  const [expenses, setExpenses] = useState<Expense[]>([]);
-
-  useEffect(() => {
-    async function loadExpenses() {
-      try {
-        const firestoreExpenses = await getExpenses();
-        setExpenses(firestoreExpenses);
-      } catch (error) {
-        console.error("Failed to load dashboard expenses:", error);
-      }
-    }
-
-    loadExpenses();
-  }, []);
-
   const now = new Date();
+  const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [selectedMonth, setSelectedMonth] = useState(
+    `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`,
+  );
 
-  const currentMonth = `${now.getFullYear()}-${String(
-    now.getMonth() + 1,
-  ).padStart(2, "0")}`;
+  const [monthMenuAnchor, setMonthMenuAnchor] = useState<null | HTMLElement>(
+    null,
+  );
 
-  const previousDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const selectedDate = new Date(`${selectedMonth}-01T00:00:00`);
+
+  const previousDate = new Date(
+    selectedDate.getFullYear(),
+    selectedDate.getMonth() - 1,
+    1,
+  );
 
   const previousMonth = `${previousDate.getFullYear()}-${String(
     previousDate.getMonth() + 1,
   ).padStart(2, "0")}`;
 
-  const currentMonthExpenses = expenses.filter((expense) =>
-    expense.date.startsWith(currentMonth),
+  const selectedMonthExpenses = expenses.filter((expense) =>
+    expense.date.startsWith(selectedMonth),
   );
 
   const previousMonthExpenses = expenses.filter((expense) =>
     expense.date.startsWith(previousMonth),
   );
 
-  const totalSpent = currentMonthExpenses.reduce(
+  const totalSpent = selectedMonthExpenses.reduce(
     (total, expense) => total + expense.amount,
     0,
   );
@@ -89,6 +86,19 @@ function Dashboard() {
 
   const displayedRemainingPercentage = Math.max(remainingPercentage, 0);
 
+  useEffect(() => {
+    async function loadExpenses() {
+      try {
+        const firestoreExpenses = await getExpenses();
+        setExpenses(firestoreExpenses);
+      } catch (error) {
+        console.error("Failed to load dashboard expenses:", error);
+      }
+    }
+
+    loadExpenses();
+  }, []);
+
   let budgetStatus = "You're on track";
   let budgetStatusColor = "success.main";
 
@@ -100,6 +110,24 @@ function Dashboard() {
     budgetStatusColor = "warning.main";
   }
 
+  const availableMonths = Array.from({ length: 12 }, (_, index) => {
+    const date = new Date(now.getFullYear(), now.getMonth() - index, 1);
+
+    return {
+      value: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
+        2,
+        "0",
+      )}`,
+      label: date.toLocaleDateString("en-US", {
+        month: "long",
+        year: "numeric",
+      }),
+    };
+  });
+
+  const selectedMonthLabel =
+    availableMonths.find((month) => month.value === selectedMonth)?.label ?? "";
+
   return (
     <Stack
       spacing={3}
@@ -109,35 +137,38 @@ function Dashboard() {
         width: "100%",
       }}
     >
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "flex-start",
-        }}
-      >
-        <Box>
-          <Typography variant="h4">Good morning</Typography>
-
-          <Typography color="text.secondary" sx={{ mt: 0.5 }}>
-            Here's your spending overview.
-          </Typography>
-        </Box>
-
+      <Box>
         <Button
           variant="outlined"
           endIcon={<KeyboardArrowDown />}
+          onClick={(event) => setMonthMenuAnchor(event.currentTarget)}
           sx={{
             borderRadius: 2,
             textTransform: "none",
             minWidth: 160,
           }}
         >
-          {now.toLocaleDateString("en-US", {
-            month: "long",
-            year: "numeric",
-          })}
+          {selectedMonthLabel}
         </Button>
+
+        <Menu
+          anchorEl={monthMenuAnchor}
+          open={Boolean(monthMenuAnchor)}
+          onClose={() => setMonthMenuAnchor(null)}
+        >
+          {availableMonths.map((month) => (
+            <MenuItem
+              key={month.value}
+              selected={month.value === selectedMonth}
+              onClick={() => {
+                setSelectedMonth(month.value);
+                setMonthMenuAnchor(null);
+              }}
+            >
+              {month.label}
+            </MenuItem>
+          ))}
+        </Menu>
       </Box>
 
       <Grid container spacing={3}>
@@ -278,9 +309,9 @@ function Dashboard() {
         </Grid>
       </Grid>
 
-      <SpendingTrendChart expenses={expenses} />
+      <SpendingTrendChart expenses={selectedMonthExpenses} />
 
-      <RecentExpenses expenses={expenses} />
+      <RecentExpenses expenses={selectedMonthExpenses} />
     </Stack>
   );
 }

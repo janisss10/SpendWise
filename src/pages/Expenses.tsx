@@ -10,18 +10,22 @@ import {
 } from "@mui/material";
 import { Add } from "@mui/icons-material";
 import ExpenseList from "../components/expenses/ExpenseList";
-import { mockExpenses } from "../data/mockExpenses";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import ExpenseToolbar from "../components/expenses/ExpenseToolbar";
 import ExpenseForm from "../components/expenses/ExpenseForm";
 import type { Expense } from "../types/expense";
-import { createExpense } from "../services/expenseService";
+import {
+  createExpense,
+  getExpenses,
+  updateExpense,
+  deleteExpense,
+} from "../services/expenseService";
 
 function Expenses() {
   const [searchQuery, setSearchQuery] = useState("");
   const [category, setCategory] = useState("all");
   const [sortBy, setSortBy] = useState("date-desc");
-  const [expenses, setExpenses] = useState(mockExpenses);
+  const [expenses, setExpenses] = useState<Expense[]>([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
   const [deletingExpense, setDeletingExpense] = useState<Expense | null>(null);
@@ -29,6 +33,25 @@ function Expenses() {
     open: false,
     message: "",
   });
+
+  useEffect(() => {
+    async function loadExpenses() {
+      try {
+        const firestoreExpenses = await getExpenses();
+
+        setExpenses(firestoreExpenses);
+      } catch (error) {
+        console.error("Failed to load expenses:", error);
+
+        setSnackbar({
+          open: true,
+          message: "Failed to load expenses",
+        });
+      }
+    }
+
+    loadExpenses();
+  }, []);
 
   const filteredExpenses = useMemo(() => {
     const filtered = expenses.filter((expense) => {
@@ -127,18 +150,31 @@ function Expenses() {
             expense={editingExpense ?? undefined}
             onSubmit={async (updatedExpense) => {
               if (editingExpense) {
-                setExpenses((currentExpenses) =>
-                  currentExpenses.map((expense) =>
-                    expense.id === updatedExpense.id ? updatedExpense : expense,
-                  ),
-                );
+                try {
+                  await updateExpense(updatedExpense);
 
-                setEditingExpense(null);
+                  setExpenses((currentExpenses) =>
+                    currentExpenses.map((expense) =>
+                      expense.id === updatedExpense.id
+                        ? updatedExpense
+                        : expense,
+                    ),
+                  );
 
-                setSnackbar({
-                  open: true,
-                  message: "Expense updated successfully",
-                });
+                  setEditingExpense(null);
+
+                  setSnackbar({
+                    open: true,
+                    message: "Expense updated successfully",
+                  });
+                } catch (error) {
+                  console.error("Failed to update expense:", error);
+
+                  setSnackbar({
+                    open: true,
+                    message: "Failed to update expense",
+                  });
+                }
               } else {
                 try {
                   const firestoreId = await createExpense(updatedExpense);
@@ -210,23 +246,34 @@ function Expenses() {
               <Button
                 variant="contained"
                 color="error"
-                onClick={() => {
+                onClick={async () => {
                   if (!deletingExpense) {
                     return;
                   }
 
-                  setExpenses((currentExpenses) =>
-                    currentExpenses.filter(
-                      (expense) => expense.id !== deletingExpense.id,
-                    ),
-                  );
+                  try {
+                    await deleteExpense(deletingExpense.id);
 
-                  setDeletingExpense(null);
+                    setExpenses((currentExpenses) =>
+                      currentExpenses.filter(
+                        (expense) => expense.id !== deletingExpense.id,
+                      ),
+                    );
 
-                  setSnackbar({
-                    open: true,
-                    message: "Expense deleted successfully",
-                  });
+                    setDeletingExpense(null);
+
+                    setSnackbar({
+                      open: true,
+                      message: "Expense deleted successfully",
+                    });
+                  } catch (error) {
+                    console.error("Failed to delete expense:", error);
+
+                    setSnackbar({
+                      open: true,
+                      message: "Failed to delete expense",
+                    });
+                  }
                 }}
               >
                 Delete

@@ -67,6 +67,8 @@ function Dashboard() {
     0,
   );
 
+  const hasPreviousMonthSpending = previousMonthTotal > 0;
+
   const spendingChange =
     previousMonthTotal === 0
       ? 0
@@ -181,40 +183,46 @@ function Dashboard() {
             iconBackground="#EEE8FF"
             iconColor="#6C4DE6"
           >
-            <Stack
-              direction="row"
-              spacing={0.5}
-              sx={{
-                alignItems: "center",
-              }}
-            >
-              {spendingIncreased ? (
-                <TrendingUp
-                  sx={{
-                    fontSize: 18,
-                    color: "error.main",
-                  }}
-                />
-              ) : (
-                <TrendingDown
-                  sx={{
-                    fontSize: 18,
-                    color: "success.main",
-                  }}
-                />
-              )}
-
-              <Typography
-                variant="body2"
-                color={spendingIncreased ? "error.main" : "success.main"}
+            {hasPreviousMonthSpending ? (
+              <Stack
+                direction="row"
+                spacing={0.5}
+                sx={{
+                  alignItems: "center",
+                }}
               >
-                {Math.abs(spendingChange).toFixed(1)}%
-              </Typography>
+                {spendingIncreased ? (
+                  <TrendingUp
+                    sx={{
+                      fontSize: 18,
+                      color: "error.main",
+                    }}
+                  />
+                ) : (
+                  <TrendingDown
+                    sx={{
+                      fontSize: 18,
+                      color: "success.main",
+                    }}
+                  />
+                )}
 
+                <Typography
+                  variant="body2"
+                  color={spendingIncreased ? "error.main" : "success.main"}
+                >
+                  {Math.abs(spendingChange).toFixed(1)}%
+                </Typography>
+
+                <Typography variant="body2" color="text.secondary">
+                  vs last month
+                </Typography>
+              </Stack>
+            ) : (
               <Typography variant="body2" color="text.secondary">
-                vs last month
+                No spending last month
               </Typography>
-            </Stack>
+            )}
           </SummaryCard>
         </Grid>
 

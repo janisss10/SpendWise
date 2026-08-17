@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import {
   Box,
   Button,
@@ -18,11 +19,13 @@ import {
 } from "@mui/icons-material";
 import SummaryCard from "../components/dashboard/SummaryCard";
 import RecentExpenses from "../components/dashboard/RecentExpenses";
-import { mockExpenses } from "../data/mockExpenses";
 import SpendingTrendChart from "../components/dashboard/SpendingTrendChart";
+import { getExpenses } from "../services/expenseService";
+import type { Expense } from "../types/expense";
 
 function Dashboard() {
-  const totalSpent = mockExpenses.reduce(
+  const [expenses, setExpenses] = useState<Expense[]>([]);
+  const totalSpent = expenses.reduce(
     (total, expense) => total + expense.amount,
     0,
   );
@@ -36,6 +39,19 @@ function Dashboard() {
 
   const remaining = monthlyBudget - totalSpent;
   const remainingPercentage = 100 - budgetUsedPercentage;
+
+  useEffect(() => {
+    async function loadExpenses() {
+      try {
+        const firestoreExpenses = await getExpenses();
+        setExpenses(firestoreExpenses);
+      } catch (error) {
+        console.error("Failed to load dashboard expenses:", error);
+      }
+    }
+
+    loadExpenses();
+  }, []);
 
   return (
     <Stack
@@ -201,9 +217,9 @@ function Dashboard() {
         </Grid>
       </Grid>
 
-      <SpendingTrendChart expenses={mockExpenses} />
+      <SpendingTrendChart expenses={expenses} />
 
-      <RecentExpenses expenses={mockExpenses} />
+      <RecentExpenses expenses={expenses} />
     </Stack>
   );
 }

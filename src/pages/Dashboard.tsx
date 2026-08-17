@@ -16,6 +16,7 @@ import {
   TrackChanges,
   TrendingDown,
   TrendingUp,
+  Warning,
 } from "@mui/icons-material";
 import SummaryCard from "../components/dashboard/SummaryCard";
 import RecentExpenses from "../components/dashboard/RecentExpenses";
@@ -25,20 +26,6 @@ import type { Expense } from "../types/expense";
 
 function Dashboard() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
-  const totalSpent = expenses.reduce(
-    (total, expense) => total + expense.amount,
-    0,
-  );
-  const previousMonthTotal = 250;
-  const spendingChange =
-    ((totalSpent - previousMonthTotal) / previousMonthTotal) * 100;
-  const spendingIncreased = spendingChange > 0;
-
-  const monthlyBudget = 2000;
-  const budgetUsedPercentage = (totalSpent / monthlyBudget) * 100;
-
-  const remaining = monthlyBudget - totalSpent;
-  const remainingPercentage = 100 - budgetUsedPercentage;
 
   useEffect(() => {
     async function loadExpenses() {
@@ -52,6 +39,66 @@ function Dashboard() {
 
     loadExpenses();
   }, []);
+
+  const now = new Date();
+
+  const currentMonth = `${now.getFullYear()}-${String(
+    now.getMonth() + 1,
+  ).padStart(2, "0")}`;
+
+  const previousDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+
+  const previousMonth = `${previousDate.getFullYear()}-${String(
+    previousDate.getMonth() + 1,
+  ).padStart(2, "0")}`;
+
+  const currentMonthExpenses = expenses.filter((expense) =>
+    expense.date.startsWith(currentMonth),
+  );
+
+  const previousMonthExpenses = expenses.filter((expense) =>
+    expense.date.startsWith(previousMonth),
+  );
+
+  const totalSpent = currentMonthExpenses.reduce(
+    (total, expense) => total + expense.amount,
+    0,
+  );
+
+  const previousMonthTotal = previousMonthExpenses.reduce(
+    (total, expense) => total + expense.amount,
+    0,
+  );
+
+  const spendingChange =
+    previousMonthTotal === 0
+      ? 0
+      : ((totalSpent - previousMonthTotal) / previousMonthTotal) * 100;
+
+  const spendingIncreased = spendingChange > 0;
+
+  const monthlyBudget: number = 2000;
+
+  const budgetUsedPercentage =
+    monthlyBudget === 0 ? 0 : (totalSpent / monthlyBudget) * 100;
+
+  const remaining = monthlyBudget - totalSpent;
+
+  const remainingPercentage =
+    monthlyBudget === 0 ? 0 : (remaining / monthlyBudget) * 100;
+
+  const displayedRemainingPercentage = Math.max(remainingPercentage, 0);
+
+  let budgetStatus = "You're on track";
+  let budgetStatusColor = "success.main";
+
+  if (budgetUsedPercentage > 100) {
+    budgetStatus = "You've exceeded your budget";
+    budgetStatusColor = "error.main";
+  } else if (budgetUsedPercentage > 80) {
+    budgetStatus = "You're close to your budget";
+    budgetStatusColor = "warning.main";
+  }
 
   return (
     <Stack
@@ -86,7 +133,10 @@ function Dashboard() {
             minWidth: 160,
           }}
         >
-          August 2026
+          {now.toLocaleDateString("en-US", {
+            month: "long",
+            year: "numeric",
+          })}
         </Button>
       </Box>
 
@@ -169,11 +219,11 @@ function Dashboard() {
                 }}
               >
                 <Typography variant="caption" color="text.secondary">
-                  {budgetUsedPercentage.toFixed(1)}% used
+                  {Math.min(budgetUsedPercentage, 100).toFixed(1)}% used
                 </Typography>
 
                 <Typography variant="caption" color="text.secondary">
-                  ${remaining.toFixed(2)} left
+                  ${Math.max(remaining, 0).toFixed(2)} left
                 </Typography>
               </Stack>
             </Stack>
@@ -191,7 +241,9 @@ function Dashboard() {
           >
             <Stack spacing={0.5}>
               <Typography variant="body2" color="text.secondary">
-                {remainingPercentage.toFixed(1)}% of budget remaining
+                {budgetUsedPercentage > 100
+                  ? `${budgetUsedPercentage.toFixed(1)}% of budget used`
+                  : `${displayedRemainingPercentage.toFixed(1)}% of budget remaining`}
               </Typography>
 
               <Stack
@@ -201,15 +253,24 @@ function Dashboard() {
                   alignItems: "center",
                 }}
               >
-                <CheckCircle
-                  sx={{
-                    fontSize: 16,
-                    color: "success.main",
-                  }}
-                />
+                {budgetUsedPercentage > 100 ? (
+                  <Warning
+                    sx={{
+                      fontSize: 16,
+                      color: budgetStatusColor,
+                    }}
+                  />
+                ) : (
+                  <CheckCircle
+                    sx={{
+                      fontSize: 16,
+                      color: budgetStatusColor,
+                    }}
+                  />
+                )}
 
-                <Typography variant="body2" color="success.main">
-                  You're on track
+                <Typography variant="body2" color={budgetStatusColor}>
+                  {budgetStatus}
                 </Typography>
               </Stack>
             </Stack>
